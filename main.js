@@ -8,7 +8,7 @@ const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 
 const BOARD = [
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -119,7 +119,6 @@ const piecePlacement = () => {
 };
 
 const cleanRow = () => {
-  //last row is full
   for (let row = 1; row < BOARD_HEIGHT; row++) {
     if (!BOARD[row].some((elem) => elem === 0)) {
       BOARD[row] = BOARD[row - 1];
@@ -142,8 +141,6 @@ document.addEventListener('keydown', (e) => {
     piece.position.y--;
   }
 });
-
-cleanRow();
 
 update();
 
