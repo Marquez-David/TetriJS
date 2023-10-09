@@ -8,6 +8,7 @@ const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 
 const BOARD = [
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -22,16 +23,15 @@ const BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 0, 0, 0, 0, 1, 1, 1]
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+  [0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
 ];
 
 const piece = {
-  position: { x: 5, y: 18 },
+  position: { x: 4, y: 5 },
   shape: [
     [1, 1],
     [1, 1]
@@ -45,16 +45,16 @@ context.scale(BLOCK_SIZE, BLOCK_SIZE);
 
 async function update() {
   drawBoard();
-  drawPiece('red');
-  //piece.position.y = piece.position.y ++;
+  drawPiece();
 
-  //checkPiecePlaced();
+  piecePlacement();
+  cleanRow();
 
   window.requestAnimationFrame(update);
   //setTimeout(() => { window.requestAnimationFrame(update); }, 500);
 }
 
-function drawBoard() {
+const drawBoard = () => {
   context.fillStyle = 'black';
   context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -66,20 +66,20 @@ function drawBoard() {
       }
     });
   });
-}
+};
 
-function drawPiece(color) {
+const drawPiece = () => {
   piece.shape.forEach((row, y) => {
     row.forEach((block, x) => {
       if (block === 1) {
-        context.fillStyle = color;
+        context.fillStyle = 'red';
         context.fillRect(x + piece.position.x, y + piece.position.y, 1, 1);
       }
     });
   });
 };
 
-function isValidMove(move) {
+const isValidMove = (move) => {
   let isValid = true;
   if (move === 'ArrowLeft') {
     for (let row = piece.position.y; row < piece.position.y + piece.shape.length; row++) {
@@ -102,11 +102,28 @@ function isValidMove(move) {
   }
 
   return isValid;
-}
+};
 
-function checkPiecePlaced() {
-  if (!isValidMove('ArrowDown')) {
-    drawPiece('white');
+const piecePlacement = () => {
+  if (piece.position.y >= BOARD_HEIGHT - piece.shape.length || !isValidMove('ArrowDown')) {
+    piece.shape.forEach((row, y) => {
+      row.forEach((block, x) => {
+        BOARD[piece.position.y + y][piece.position.x + x] = 1;
+      });
+    });
+
+    piece.position = { y: -1, x: 4 };
+  } else {
+    //piece.position.y = piece.position.y + 1;
+  }
+};
+
+const cleanRow = () => {
+  //last row is full
+  for (let row = 1; row < BOARD_HEIGHT; row++) {
+    if (!BOARD[row].some((elem) => elem === 0)) {
+      BOARD[row] = BOARD[row - 1];
+    }
   }
 }
 
@@ -125,6 +142,8 @@ document.addEventListener('keydown', (e) => {
     piece.position.y--;
   }
 });
+
+cleanRow();
 
 update();
 
