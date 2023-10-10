@@ -11,7 +11,6 @@ const BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -23,11 +22,12 @@ const BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-  [1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
 const shapes = [
@@ -66,16 +66,19 @@ canvas.height = BOARD_HEIGHT * BLOCK_SIZE;
 
 context.scale(BLOCK_SIZE, BLOCK_SIZE);
 
-function update(time = 0) {
-
+function update() {
   drawBoard();
   drawPiece();
 
-  //handlePiecePlacement();
+  handlePiecePlacement();
   clearRow();
 
   window.requestAnimationFrame(update);
 }
+
+setInterval(function () {
+  piece.position.y++
+}, 500);
 
 /**
  * Draws the game board.
@@ -138,7 +141,6 @@ const isValidMove = (move) => {
  * - Updates the game board with the placed piece.
  * - Resets the piece to its initial position if it cannot move downward.
  */
-/*
 const handlePiecePlacement = () => {
   if (piece.position.y >= BOARD_HEIGHT - piece.shape.length || !isValidMove('ArrowDown')) {
     piece.shape.forEach((row, y) => {
@@ -153,7 +155,7 @@ const handlePiecePlacement = () => {
   } else {
     //piece.position.y = piece.position.y + 1;
   }
-};*/
+};
 
 /**
  * Clears completed rows on the game board:
@@ -172,8 +174,8 @@ const clearRow = () => {
  * Generates a new random piece and sets its initial position.
  */
 const generateNewPiece = () => {
-  piece.position = { y: -1, x: 4 };
-  piece.shape = shapes[Math.floor(Math.random() * 4)];
+  piece.position = { y: 0, x: 4 };
+  piece.shape = shapes[Math.floor(Math.random() * 5)];
 };
 
 document.addEventListener('keydown', (e) => {
@@ -186,8 +188,6 @@ document.addEventListener('keydown', (e) => {
     piece.position.x++;
   } else if (e.key === 'ArrowDown' && bottomLimit && isValidMove('ArrowDown')) {
     piece.position.y++;
-  } else if (e.key === 'ArrowUp') {
-    piece.position.y--;
   }
 });
 
