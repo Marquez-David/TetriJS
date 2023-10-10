@@ -11,7 +11,7 @@ const BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -24,21 +24,21 @@ const BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-  [0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+  [1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
 ];
 
 const shapes = [
   [
     [1, 0],
     [1, 0],
-    [1, 1]
+    [1, 1],
   ],
   [
     [1, 1],
-    [1, 1]
+    [1, 1],
   ],
   [
     [1],
@@ -48,37 +48,33 @@ const shapes = [
   ],
   [
     [1, 1, 0],
-    [0, 1, 1]
+    [0, 1, 1],
+  ],
+  [
+    [1, 1, 1],
+    [0, 1, 0]
   ]
 ];
 
 const piece = {
-  position: { x: 4, y: 5 },
-  shape: [
-    [1, 0],
-    [1, 0],
-    [1, 1]
-  ],
+  position: { x: 0, y: 0 },
+  shape: [],
 };
-
-const bottomLimit = piece.position.y < BOARD_HEIGHT - piece.shape.length;
-const rightLimit = piece.position.x < BOARD_WIDTH - piece.shape[0].length;
-const leftLimit = piece.position.x > 0;
 
 canvas.width = BOARD_WIDTH * BLOCK_SIZE;
 canvas.height = BOARD_HEIGHT * BLOCK_SIZE;
 
 context.scale(BLOCK_SIZE, BLOCK_SIZE);
 
-async function update() {
+function update(time = 0) {
+
   drawBoard();
   drawPiece();
 
-  handlePiecePlacement();
+  //handlePiecePlacement();
   clearRow();
 
   window.requestAnimationFrame(update);
-  //setTimeout(() => { window.requestAnimationFrame(update); }, 500);
 }
 
 /**
@@ -119,26 +115,19 @@ const drawPiece = () => {
  */
 const isValidMove = (move) => {
   let isValid = true;
-  if (move === 'ArrowLeft') {
-    for (let row = piece.position.y; row < piece.position.y + piece.shape.length; row++) {
-      if (BOARD[row][piece.position.x - 1] === 1) {
-        isValid = false;
+  piece.shape.forEach((row, y) => {
+    row.forEach((block, x) => {
+      if (block === 1) {
+        if (move === 'ArrowLeft' && BOARD[piece.position.y + y][piece.position.x + x - 1] === 1) {
+          isValid = false;
+        } else if (move === 'ArrowDown' && BOARD[piece.position.y + y + 1][piece.position.x + x] === 1) {
+          isValid = false;
+        } else if (move === 'ArrowRight' && BOARD[piece.position.y + y][piece.position.x + x + 1] === 1) {
+          isValid = false;
+        }
       }
-    }
-  } else if (move === 'ArrowRight') {
-    for (let row = piece.position.y; row < piece.position.y + piece.shape.length; row++) {
-      //piece.shape[0].reduce((accumulator, currentValue) => accumulator + currentValue, 0)] -> possible solution
-      if (BOARD[row][piece.position.x + piece.shape[0].length] === 1) {
-        isValid = false;
-      }
-    }
-  } else if (move === 'ArrowDown') {
-    for (let column = piece.position.x; column < piece.position.x + piece.shape[0].length; column++) {
-      if (BOARD[piece.position.y + piece.shape.length][column] === 1) {
-        isValid = false;
-      }
-    }
-  }
+    });
+  });
 
   return isValid;
 };
@@ -149,6 +138,7 @@ const isValidMove = (move) => {
  * - Updates the game board with the placed piece.
  * - Resets the piece to its initial position if it cannot move downward.
  */
+/*
 const handlePiecePlacement = () => {
   if (piece.position.y >= BOARD_HEIGHT - piece.shape.length || !isValidMove('ArrowDown')) {
     piece.shape.forEach((row, y) => {
@@ -163,10 +153,10 @@ const handlePiecePlacement = () => {
   } else {
     //piece.position.y = piece.position.y + 1;
   }
-};
+};*/
 
 /**
- * Clears completed rows on the Tetris game board:
+ * Clears completed rows on the game board:
  * - Iterates through each row to check if it's filled with blocks.
  * - Removes filled rows by shifting rows above them downward.
  */
@@ -187,6 +177,9 @@ const generateNewPiece = () => {
 };
 
 document.addEventListener('keydown', (e) => {
+  const bottomLimit = piece.position.y < BOARD_HEIGHT - piece.shape.length;
+  const rightLimit = piece.position.x < BOARD_WIDTH - piece.shape[0].length;
+  const leftLimit = piece.position.x > 0;
   if (e.key === 'ArrowLeft' && leftLimit && isValidMove('ArrowLeft')) {
     piece.position.x--;
   } else if (e.key === 'ArrowRight' && rightLimit && isValidMove('ArrowRight')) {
@@ -198,5 +191,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+generateNewPiece();
 update();
 
