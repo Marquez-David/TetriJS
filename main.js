@@ -1,115 +1,30 @@
-import './style.css'
+import './style.css';
+import { SIZES, MOVES } from './constants';
+import { BOARD, drawBoard } from './board'
+import { PIECE, drawPiece, generateNewPiece, rotatePiece } from './piece'
+
+let score = 0;
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
-const BLOCK_SIZE = 30;
-const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 20;
-
-const BOARD = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-];
-
-const shapes = [
-  [
-    [1, 0],
-    [1, 0],
-    [1, 1],
-  ],
-  [
-    [1, 1],
-    [1, 1],
-  ],
-  [
-    [1],
-    [1],
-    [1],
-    [1]
-  ],
-  [
-    [1, 1, 0],
-    [0, 1, 1],
-  ],
-  [
-    [1, 1, 1],
-    [0, 1, 0]
-  ]
-];
-
-const piece = {
-  position: { x: 0, y: 0 },
-  shape: [],
-};
-
-canvas.width = BOARD_WIDTH * BLOCK_SIZE;
-canvas.height = BOARD_HEIGHT * BLOCK_SIZE;
-
-context.scale(BLOCK_SIZE, BLOCK_SIZE);
+canvas.width = SIZES.BOARD_WIDTH * SIZES.BLOCK_SIZE;
+canvas.height = SIZES.BOARD_HEIGHT * SIZES.BLOCK_SIZE;
+context.scale(SIZES.BLOCK_SIZE, SIZES.BLOCK_SIZE);
 
 function update() {
   drawBoard();
   drawPiece();
 
-  handlePiecePlacement();
-  clearRow();
+  document.querySelector('span').innerText = score;
 
+  handlePiecePlacement();
   window.requestAnimationFrame(update);
 }
 
 setInterval(function () {
-  piece.position.y++
-}, 500);
-
-/**
- * Draws the game board.
- */
-const drawBoard = () => {
-  context.fillStyle = 'black';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  BOARD.forEach((row, y) => {
-    row.forEach((block, x) => {
-      if (block === 1) {
-        context.fillStyle = 'white';
-        context.fillRect(x, y, 1, 1);
-      }
-    });
-  });
-};
-
-/**
- * Draws the current piece on the game board.
- */
-const drawPiece = () => {
-  piece.shape.forEach((row, y) => {
-    row.forEach((block, x) => {
-      if (block === 1) {
-        context.fillStyle = 'red';
-        context.fillRect(x + piece.position.x, y + piece.position.y, 1, 1);
-      }
-    });
-  });
-};
+  //piece.position.y++
+}, 700);
 
 /**
  * Checks if a given move is valid for the current piece.
@@ -118,14 +33,16 @@ const drawPiece = () => {
  */
 const isValidMove = (move) => {
   let isValid = true;
-  piece.shape.forEach((row, y) => {
+  PIECE.shape.forEach((row, y) => {
     row.forEach((block, x) => {
       if (block === 1) {
-        if (move === 'ArrowLeft' && BOARD[piece.position.y + y][piece.position.x + x - 1] === 1) {
+        const pieceX = PIECE.position.x + x;
+        const pieceY = PIECE.position.y + y;
+        if (move === 'ArrowLeft' && (pieceX - 1 < 0 || BOARD[pieceY][pieceX - 1] === 1)) {
           isValid = false;
-        } else if (move === 'ArrowDown' && BOARD[piece.position.y + y + 1][piece.position.x + x] === 1) {
+        } else if (move === 'ArrowDown' && (pieceY + 1 >= SIZES.BOARD_HEIGHT || BOARD[pieceY + 1][pieceX] === 1)) {
           isValid = false;
-        } else if (move === 'ArrowRight' && BOARD[piece.position.y + y][piece.position.x + x + 1] === 1) {
+        } else if (move === 'ArrowRight' && (pieceX + 1 >= SIZES.BOARD_WIDTH || BOARD[pieceY][pieceX + 1] === 1)) {
           isValid = false;
         }
       }
@@ -142,18 +59,17 @@ const isValidMove = (move) => {
  * - Resets the piece to its initial position if it cannot move downward.
  */
 const handlePiecePlacement = () => {
-  if (piece.position.y >= BOARD_HEIGHT - piece.shape.length || !isValidMove('ArrowDown')) {
-    piece.shape.forEach((row, y) => {
+  if (!isValidMove('ArrowDown')) {
+    PIECE.shape.forEach((row, y) => {
       row.forEach((block, x) => {
-        if (piece.shape[y][x] === 1) {
-          BOARD[piece.position.y + y][piece.position.x + x] = 1;
+        if (PIECE.shape[y][x] === 1) {
+          BOARD[PIECE.position.y + y][PIECE.position.x + x] = 1;
         }
       });
     });
 
+    clearRow();
     generateNewPiece();
-  } else {
-    //piece.position.y = piece.position.y + 1;
   }
 };
 
@@ -163,31 +79,23 @@ const handlePiecePlacement = () => {
  * - Removes filled rows by shifting rows above them downward.
  */
 const clearRow = () => {
-  for (let row = 1; row < BOARD_HEIGHT; row++) {
+  for (let row = 1; row < SIZES.BOARD_HEIGHT; row++) {
     if (!BOARD[row].some((elem) => elem === 0)) {
       BOARD[row] = BOARD[row - 1];
+      score += 10;
     }
   }
 };
 
-/**
- * Generates a new random piece and sets its initial position.
- */
-const generateNewPiece = () => {
-  piece.position = { y: 0, x: 4 };
-  piece.shape = shapes[Math.floor(Math.random() * 5)];
-};
-
 document.addEventListener('keydown', (e) => {
-  const bottomLimit = piece.position.y < BOARD_HEIGHT - piece.shape.length;
-  const rightLimit = piece.position.x < BOARD_WIDTH - piece.shape[0].length;
-  const leftLimit = piece.position.x > 0;
-  if (e.key === 'ArrowLeft' && leftLimit && isValidMove('ArrowLeft')) {
-    piece.position.x--;
-  } else if (e.key === 'ArrowRight' && rightLimit && isValidMove('ArrowRight')) {
-    piece.position.x++;
-  } else if (e.key === 'ArrowDown' && bottomLimit && isValidMove('ArrowDown')) {
-    piece.position.y++;
+  if (e.key === MOVES.LEFT && isValidMove(MOVES.LEFT)) {
+    PIECE.position.x--;
+  } else if (e.key === MOVES.RIGTH && isValidMove(MOVES.RIGTH)) {
+    PIECE.position.x++;
+  } else if (e.key === MOVES.DOWN && isValidMove(MOVES.DOWN)) {
+    PIECE.position.y++;
+  } else if (e.key === MOVES.SWAP) { //e.code === 'Space'
+    PIECE.shape = rotatePiece();
   }
 });
 
