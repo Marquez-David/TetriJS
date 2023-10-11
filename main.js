@@ -15,16 +15,19 @@ context.scale(SIZES.BLOCK_SIZE, SIZES.BLOCK_SIZE);
 function update() {
   drawBoard();
   drawPiece();
-
   document.querySelector('span').innerText = score;
-
   handlePiecePlacement();
-  window.requestAnimationFrame(update);
+
+  if (BOARD[0][4] === 1) {
+    alert('GAME OVER!');
+  } else {
+    window.requestAnimationFrame(update);
+  }
 }
 
 setInterval(function () {
-  //piece.position.y++
-}, 700);
+  PIECE.position.y++
+}, 600);
 
 /**
  * Checks if a given move is valid for the current piece.
@@ -38,11 +41,11 @@ const isValidMove = (move) => {
       if (block === 1) {
         const pieceX = PIECE.position.x + x;
         const pieceY = PIECE.position.y + y;
-        if (move === 'ArrowLeft' && (pieceX - 1 < 0 || BOARD[pieceY][pieceX - 1] === 1)) {
+        if (move === MOVES.LEFT && (pieceX - 1 < 0 || BOARD[pieceY][pieceX - 1] === 1)) {
           isValid = false;
-        } else if (move === 'ArrowDown' && (pieceY + 1 >= SIZES.BOARD_HEIGHT || BOARD[pieceY + 1][pieceX] === 1)) {
+        } else if (move === MOVES.DOWN && (pieceY + 1 >= SIZES.BOARD_HEIGHT || BOARD[pieceY + 1][pieceX] === 1)) {
           isValid = false;
-        } else if (move === 'ArrowRight' && (pieceX + 1 >= SIZES.BOARD_WIDTH || BOARD[pieceY][pieceX + 1] === 1)) {
+        } else if (move === MOVES.RIGTH && (pieceX + 1 >= SIZES.BOARD_WIDTH || BOARD[pieceY][pieceX + 1] === 1)) {
           isValid = false;
         }
       }
